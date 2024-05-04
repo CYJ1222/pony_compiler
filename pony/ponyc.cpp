@@ -43,8 +43,13 @@ static cl::opt<std::string> inputFilename(cl::Positional,
                                           cl::init("-"),
                                           cl::value_desc("filename"));
 
-namespace {
-enum InputType { Pony, MLIR };
+namespace
+{
+  enum InputType
+  {
+    Pony,
+    MLIR
+  };
 } // namespace
 static cl::opt<enum InputType> inputType(
     "x", cl::init(Pony), cl::desc("Decided the kind of output desired"),
@@ -52,17 +57,19 @@ static cl::opt<enum InputType> inputType(
     cl::values(clEnumValN(MLIR, "mlir",
                           "load the input file as an MLIR file")));
 
-namespace {
-enum Action {
-  None,
-  DumpToken,
-  DumpAST,
-  DumpMLIR,
-  DumpMLIRAffine,
-  DumpMLIRLLVM,
-  DumpLLVMIR,
-  RunJIT
-};
+namespace
+{
+  enum Action
+  {
+    None,
+    DumpToken,
+    DumpAST,
+    DumpMLIR,
+    DumpMLIRAffine,
+    DumpMLIRLLVM,
+    DumpLLVMIR,
+    RunJIT
+  };
 } // namespace
 static cl::opt<enum Action> emitAction(
     "emit", cl::desc("Select the kind of output desired"),
@@ -81,10 +88,12 @@ static cl::opt<enum Action> emitAction(
 static cl::opt<bool> enableOpt("opt", cl::desc("Enable optimizations"));
 
 /// Returns a Pony AST resulting from parsing the file or a nullptr on error.
-std::unique_ptr<pony::ModuleAST> parseInputFile(llvm::StringRef filename) {
+std::unique_ptr<pony::ModuleAST> parseInputFile(llvm::StringRef filename)
+{
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr =
       llvm::MemoryBuffer::getFileOrSTDIN(filename);
-  if (std::error_code ec = fileOrErr.getError()) {
+  if (std::error_code ec = fileOrErr.getError())
+  {
     llvm::errs() << "Could not open input file: " << ec.message() << "\n";
     return nullptr;
   }
@@ -95,10 +104,12 @@ std::unique_ptr<pony::ModuleAST> parseInputFile(llvm::StringRef filename) {
 }
 
 int loadMLIR(mlir::MLIRContext &context,
-             mlir::OwningOpRef<mlir::ModuleOp> &module) {
+             mlir::OwningOpRef<mlir::ModuleOp> &module)
+{
   // Handle '.pony' input to the compiler.
   if (inputType != InputType::MLIR &&
-      !llvm::StringRef(inputFilename).endswith(".mlir")) {
+      !llvm::StringRef(inputFilename).endswith(".mlir"))
+  {
     auto moduleAST = parseInputFile(inputFilename);
     if (!moduleAST)
       return 6;
@@ -109,7 +120,8 @@ int loadMLIR(mlir::MLIRContext &context,
   // Otherwise, the input is '.mlir'.
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr =
       llvm::MemoryBuffer::getFileOrSTDIN(inputFilename);
-  if (std::error_code ec = fileOrErr.getError()) {
+  if (std::error_code ec = fileOrErr.getError())
+  {
     llvm::errs() << "Could not open input file: " << ec.message() << "\n";
     return -1;
   }
@@ -118,7 +130,8 @@ int loadMLIR(mlir::MLIRContext &context,
   llvm::SourceMgr sourceMgr;
   sourceMgr.AddNewSourceBuffer(std::move(*fileOrErr), llvm::SMLoc());
   module = mlir::parseSourceFile<mlir::ModuleOp>(sourceMgr, &context);
-  if (!module) {
+  if (!module)
+  {
     llvm::errs() << "Error can't load file " << inputFilename << "\n";
     return 3;
   }
@@ -126,7 +139,8 @@ int loadMLIR(mlir::MLIRContext &context,
 }
 
 int loadAndProcessMLIR(mlir::MLIRContext &context,
-                       mlir::OwningOpRef<mlir::ModuleOp> &module) {
+                       mlir::OwningOpRef<mlir::ModuleOp> &module)
+{
   if (int error = loadMLIR(context, module))
     return error;
 
@@ -138,7 +152,8 @@ int loadAndProcessMLIR(mlir::MLIRContext &context,
   bool isLoweringToAffine = emitAction >= Action::DumpMLIRAffine;
   bool isLoweringToLLVM = emitAction >= Action::DumpMLIRLLVM;
 
-  if (enableOpt || isLoweringToAffine) {
+  if (enableOpt || isLoweringToAffine)
+  {
     // Inline all functions into main and then delete them.
     pm.addPass(mlir::createInlinerPass());
 
@@ -150,7 +165,8 @@ int loadAndProcessMLIR(mlir::MLIRContext &context,
     optPM.addPass(mlir::createCSEPass());
   }
 
-  if (isLoweringToAffine) {
+  if (isLoweringToAffine)
+  {
     // Partially lower the pony dialect.
     pm.addPass(mlir::pony::createLowerToAffinePass());
 
@@ -160,13 +176,15 @@ int loadAndProcessMLIR(mlir::MLIRContext &context,
     optPM.addPass(mlir::createCSEPass());
 
     // Add optimizations if enabled.
-    if (enableOpt) {
+    if (enableOpt)
+    {
       optPM.addPass(mlir::createLoopFusionPass());
       optPM.addPass(mlir::createAffineScalarReplacementPass());
     }
   }
 
-  if (isLoweringToLLVM) {
+  if (isLoweringToLLVM)
+  {
     // Finish lowering the pony IR to the LLVM dialect.
     pm.addPass(mlir::pony::createLowerToLLVMPass());
   }
@@ -176,14 +194,17 @@ int loadAndProcessMLIR(mlir::MLIRContext &context,
   return 0;
 }
 // TODO:补充“词法分析器正确性”验证程序int dumpToken()
-int dumpToken() {
-  if (inputType == InputType::MLIR) {
+int dumpToken()
+{
+  if (inputType == InputType::MLIR)
+  {
     llvm::errs() << "Can't dump Pony Tokens when the input is MLIR\n";
     return 5;
   }
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr =
       llvm::MemoryBuffer::getFileOrSTDIN(inputFilename);
-  if (std::error_code ec = fileOrErr.getError()) {
+  if (std::error_code ec = fileOrErr.getError())
+  {
     llvm::errs() << "Could not open input file: " << ec.message() << "\n";
     return 0;
   }
@@ -192,20 +213,118 @@ int dumpToken() {
   LexerBuffer lexer(buffer.begin(), buffer.end(), std::string(inputFilename));
 
   lexer.getNextToken(); // prime the lexer
+  int token;
+  while (token = lexer.getCurToken())
+  {
+    if (token == tok_eof)
 
+    {
+      llvm::outs() << "EOF" << ' ';
+      break;
+    }
+    switch (token)
+    {
+    case tok_semicolon:
+    {
+      llvm::outs() << ';' << ' ';
+      break;
+    }
+
+    case tok_parenthese_open:
+    {
+      llvm::outs() << '(' << ' ';
+      break;
+    }
+
+    case tok_parenthese_close:
+    {
+      llvm::outs() << ')' << ' ';
+      break;
+    }
+
+    case tok_bracket_open:
+    {
+      llvm::outs() << '{' << ' ';
+      break;
+    }
+
+    case tok_bracket_close:
+    {
+      llvm::outs() << '}' << ' ';
+      break;
+    }
+
+    case tok_sbracket_open:
+    {
+      llvm::outs() << '[' << ' ';
+      break;
+    }
+    case tok_ivalid:
+    {
+      llvm::outs() <<' ';
+      break;
+    }
+
+    case tok_sbracket_close:
+    {
+      llvm::outs() << ']' << ' ';
+      break;
+    }
+
+    case tok_return:
+    {
+      llvm::outs() << "return" << ' ';
+      break;
+    }
+
+    case tok_var:
+    {
+      llvm::outs() << "var" << ' ';
+      break;
+    }
+
+    case tok_def:
+    {
+      llvm::outs() << "def" << ' ';
+      break;
+    }
+
+    case tok_identifier:
+    {
+      llvm::outs() << lexer.getId() << ' ';
+      break;
+    }
+
+    case tok_number:
+    {
+      double num = lexer.getValue();
+      if (num == double(int(num)))
+        llvm::outs() << int(num) << ' ';
+      else
+        llvm::outs() << double(num) << ' ';
+      break;
+    }
+
+    default:
+      llvm::outs() << char(token) << ' ';
+      break;
+    }
+    lexer.getNextToken();
+  }
   // TODO: 使用lexer遍历整个文档，最终按顺序输出识别到的每一种Token
   //       具体输出格式可参考大作业文档中给出的示例。
-  /* 
-    *
-    *  Write your code here.
-    *
-    */
+  /*
+   *
+   *  Write your code here.
+   *
+   */
   return 0;
 }
 
-
-int dumpAST() {
-  if (inputType == InputType::MLIR) {
+int dumpAST()
+{
+  if (inputType == InputType::MLIR)
+  {
     llvm::errs() << "Can't dump a Pony AST when the input is MLIR\n";
     return 5;
   }
@@ -218,14 +337,16 @@ int dumpAST() {
   return 0;
 }
 
-int dumpLLVMIR(mlir::ModuleOp module) {
+int dumpLLVMIR(mlir::ModuleOp module)
+{
   // Register the translation to LLVM IR with the MLIR context.
   mlir::registerLLVMDialectTranslation(*module->getContext());
 
   // Convert the module to LLVM IR in a new LLVM IR context.
   llvm::LLVMContext llvmContext;
   auto llvmModule = mlir::translateModuleToLLVMIR(module, llvmContext);
-  if (!llvmModule) {
+  if (!llvmModule)
+  {
     llvm::errs() << "Failed to emit LLVM IR\n";
     return -1;
   }
@@ -239,7 +360,8 @@ int dumpLLVMIR(mlir::ModuleOp module) {
   auto optPipeline = mlir::makeOptimizingTransformer(
       /*optLevel=*/enableOpt ? 3 : 0, /*sizeLevel=*/0,
       /*targetMachine=*/nullptr);
-  if (auto err = optPipeline(llvmModule.get())) {
+  if (auto err = optPipeline(llvmModule.get()))
+  {
     llvm::errs() << "Failed to optimize LLVM IR " << err << "\n";
     return -1;
   }
@@ -247,7 +369,8 @@ int dumpLLVMIR(mlir::ModuleOp module) {
   return 0;
 }
 
-int runJit(mlir::ModuleOp module) {
+int runJit(mlir::ModuleOp module)
+{
   // Initialize LLVM targets.
   llvm::InitializeNativeTarget();
   llvm::InitializeNativeTargetAsmPrinter();
@@ -271,7 +394,8 @@ int runJit(mlir::ModuleOp module) {
 
   // Invoke the JIT-compiled function.
   auto invocationResult = engine->invokePacked("main");
-  if (invocationResult) {
+  if (invocationResult)
+  {
     llvm::errs() << "JIT invocation failed\n";
     return -1;
   }
@@ -279,14 +403,14 @@ int runJit(mlir::ModuleOp module) {
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   // Register any command line options.
   mlir::registerAsmPrinterCLOptions();
   mlir::registerMLIRContextCLOptions();
   mlir::registerPassManagerCLOptions();
 
   cl::ParseCommandLineOptions(argc, argv, "pony compiler\n");
-
 
   if (emitAction == Action::DumpToken)
     return dumpToken();
@@ -306,7 +430,8 @@ int main(int argc, char **argv) {
 
   // If we aren't exporting to non-mlir, then we are done.
   bool isOutputingMLIR = emitAction <= Action::DumpMLIRLLVM;
-  if (isOutputingMLIR) {
+  if (isOutputingMLIR)
+  {
     module->dump();
     return 0;
   }
