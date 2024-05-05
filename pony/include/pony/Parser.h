@@ -193,7 +193,7 @@ namespace pony
     // You need to support the third method:
     //    (3) var<2,3> a = [1, 2, 3, 4, 5, 6]
     // Some functions may be useful:  getLastLocation(); getNextToken();
-    std::unique_ptr<VarDeclExprAST> parseDeclaration()//youcuo:
+    std::unique_ptr<VarDeclExprAST> parseDeclaration() // youcuo:
     {
       auto loc = lexer.getLastLocation();
 
@@ -203,34 +203,33 @@ namespace pony
       // TODO: check to see if this is a 'var' declaration
       //       If not, report the error with 'parseError', otherwise eat 'var'
 
-      if (lexer.getCurToken() != tok_var)
+      if (lexer.getCurToken() != tok_var) // check var
         return parseError<VarDeclExprAST>("var", "parsedeclar");
       lexer.getNextToken(); // eat var
-      // lexer.getNextToken();
       //  TODO: check to see if this is a variable name(identifier)
       //        If not, report the error with 'parseError', otherwise eat the variable name
       std::unique_ptr<VarType> type; // Type is optional, it can be inferred
 
-      if (lexer.getCurToken()==Token('<'))
+      if (lexer.getCurToken() == Token('<'))
       {
         type = parseType();
         if (!type)
           return nullptr;
-      std::string id(lexer.getId());//id暂时是null
+        std::string id(lexer.getId()); // id暂时是null
 
-      lexer.consume(tok_identifier);
-      lexer.consume(Token('='));
-      auto expr = parseExpression();//[1, 2, 3, 4, 5, 6]
-      return std::make_unique<VarDeclExprAST>(std::move(loc), std::move(id),
-                                              std::move(*type), std::move(expr));
+        lexer.consume(tok_identifier);
+        lexer.consume(Token('='));
+        auto expr = parseExpression(); //[1, 2, 3, 4, 5, 6]
+        return std::make_unique<VarDeclExprAST>(std::move(loc), std::move(id),
+                                                std::move(*type), std::move(expr));
       }
       if (lexer.getCurToken() != tok_identifier)
         return parseError<VarDeclExprAST>("id", "parsedeclar");
-      std::string id(lexer.getId());//id暂时是null
-      lexer.consume(tok_identifier); // eat name
-      //助教提供的参考中vardecl后无变量名，说明没有给id赋值std::string id(lexer.getId());
-      //不赋值的情况下不区分var会出错
-      //但是test9可以报error而不是异常
+      std::string id(lexer.getId()); // id
+      lexer.consume(tok_identifier); // eat id
+      // 助教提供的参考中vardecl后无变量名，说明没有给id赋值std::string id(lexer.getId());
+      // 不赋值的情况下不区分var会出错
+      // 但是test9可以报error而不是异常
       if (lexer.getCurToken() == '<')
       {
         type = parseType();
@@ -241,7 +240,7 @@ namespace pony
       if (!type)
         type = std::make_unique<VarType>();
       lexer.consume(Token('='));
-      auto expr = parseExpression();//[1, 2, 3, 4, 5, 6]
+      auto expr = parseExpression(); //[1, 2, 3, 4, 5, 6]
       return std::make_unique<VarDeclExprAST>(std::move(loc), std::move(id),
                                               std::move(*type), std::move(expr));
     }
@@ -343,47 +342,47 @@ namespace pony
     //        5. 如果是print，要确保其内部只有一个参数，如果有多个参数，要输出错误信息。最终返回相应AST时，可以使用std::make_unique<PrintExprAST>(...)。
     std::unique_ptr<ExprAST> parseIdentifierExpr()
     {
-      std::string name(lexer.getId());
-      auto loc = lexer.getLastLocation();
-      lexer.consume(tok_identifier);
-      Token tok = lexer.getCurToken();
+      std::string name(lexer.getId());    // 取变量名
+      auto loc = lexer.getLastLocation(); // 取location
+      lexer.consume(tok_identifier);      // comsume id
+      Token tok = lexer.getCurToken();    // 取id后的tok
 
       if (lexer.getCurToken() != Token('(')) // Simple variable ref.
         return std::make_unique<VariableExprAST>(std::move(loc), name);
 
-      lexer.consume(Token('('));
-      std::vector<std::unique_ptr<ExprAST>> args;
-      if (lexer.getCurToken() != Token(')'))
+      lexer.consume(Token('('));                  // 跳过'('
+      std::vector<std::unique_ptr<ExprAST>> args; // 解析参数数组
+      if (lexer.getCurToken() != Token(')'))      // 参数非空
       {
-        while (true)
+        while (true) // 循环解析
         {
-          if (auto arg = parseExpression())
-            args.push_back(std::move(arg));
+          if (auto arg = parseExpression()) // 解析一个参数
+            args.push_back(std::move(arg)); // 参数非空
           else
-            return nullptr;
+            return nullptr; // 出错，暂时处理
 
-          if (lexer.getCurToken() == Token(')'))
+          if (lexer.getCurToken() == Token(')')) // 是否结束
             break;
 
-          if (lexer.getCurToken() != Token(','))
-            return parseError<ExprAST>(", or )", "in argument list");
+          if (lexer.getCurToken() != Token(','))                      // 没遇到了','
+            return parseError<ExprAST>(", or )", "in argument list"); // 参数格式错误
           lexer.getNextToken();
         }
       }
-      lexer.consume(Token(')'));
+      lexer.consume(Token(')')); // eat ')'
 
       // It can be a builtin call to print
-      if (name == "print")
+      if (name == "print") // print特判
       {
-        if (args.size() != 1)
+        if (args.size() != 1) // print参数个数为1
           return parseError<ExprAST>("<single arg>", "as argument to print()");
 
-        return std::make_unique<PrintExprAST>(loc, std::move(args[0]));
+        return std::make_unique<PrintExprAST>(loc, std::move(args[0])); // print ast
       }
 
       // Call to a user-defined function
       return std::make_unique<CallExprAST>(loc, std::string(name),
-                                           std::move(args));
+                                           std::move(args)); // 普通函数ast
     }
 
     /// Parse a literal number.
@@ -525,30 +524,29 @@ namespace pony
                                            std::unique_ptr<ExprAST> lhs)
     {
 
-      int tokPrec = getTokPrecedence();
+      int tokPrec = getTokPrecedence(); // 目前tokpre
 
-      if (tokPrec < exprPrec)
-        return lhs;
-
-      int binOp = lexer.getCurToken();
-      lexer.consume(Token(binOp));
-      auto loc = lexer.getLastLocation();//指针过了primary
-
-      auto rhs = parsePrimary();//指针到了binOp
-      if (!rhs)
-        return parseError<ExprAST>("expression", "to complete binary operator");
-
-      int nextPrec = getTokPrecedence();
-      if (tokPrec < nextPrec)
+      if (exprPrec > tokPrec) // 小于 exprPrec 结束
       {
-        rhs = parseBinOpRHS(tokPrec + 1, std::move(rhs));
-        if (!rhs)
-          return nullptr;
+        return lhs;
       }
+      int binOp = lexer.getCurToken();//取binOp
+      lexer.consume(Token(binOp));//移动
+      auto loc = lexer.getLastLocation();//保存位置
 
-      lhs = std::make_unique<BinaryExprAST>(std::move(loc), binOp, std::move(lhs), std::move(rhs));
-
-      return parseBinOpRHS(exprPrec, std::move(lhs));
+      auto rhs = parsePrimary();//取rhs
+      int nextPrec = getTokPrecedence();//取下一个binop优先级
+      if (nextPrec <= tokPrec)//true则rhs与lhs结合
+      {
+        lhs = std::make_unique<BinaryExprAST>(std::move(loc), binOp, std::move(lhs), std::move(rhs));//merge
+        return parseBinOpRHS(0, std::move(lhs));//左递归
+      }
+      else//rhs不可直接与lhs结合
+      {
+        rhs = parseBinOpRHS(tokPrec, std::move(rhs));//取下完整的rhs,右递归
+        lhs = std::make_unique<BinaryExprAST>(std::move(loc), binOp, std::move(lhs), std::move(rhs));//merge
+        return parseBinOpRHS(tokPrec, std::move(lhs));//左递归
+      }
     }
 
     /// Helper function to signal errors while parsing, it takes an argument
