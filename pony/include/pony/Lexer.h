@@ -43,7 +43,6 @@ namespace pony
 
     tok_identifier = -5,
     tok_number = -6,
-    tok_ivalid = -7,//新增加的更改
   };
 
   /// The Lexer is an abstract base class providing all the facilities that the
@@ -186,15 +185,15 @@ namespace pony
           if (idstr == "var")
             return tok_var;
           //一般id
+          
           identifierStr = idstr;
           return tok_identifier;
         }
         //非法id
-        llvm::outs() << "error_tok_id:"<<idstr;
-        return tok_ivalid;
+        llvm::errs() << "error_tok_id:"<<idstr;
       }
       //以数字开头
-      if (isdigit(lastChar) || lastChar == '.')
+      else if (isdigit(lastChar) || lastChar == '.')
       {
         std::string numStr;
         do
@@ -211,11 +210,10 @@ namespace pony
         return tok_number;
       }
         //非法num
-        llvm::outs()<< "error_tok_number:"<<numStr;
-        return tok_ivalid;
+        llvm::errs()<< "error_tok_number:"<<numStr;
       }
       // 跳过注释，递归调用取下一个token
-      if (lastChar == '#')
+      else if (lastChar == '#')
       {
         // Comment until end of line.
         do
@@ -228,7 +226,7 @@ namespace pony
       }
 
       // Check for end of file.  Don't eat the EOF.
-      if (lastChar == EOF)
+      else if (lastChar == EOF)
         return tok_eof;
 
       // Otherwise, just return the character as its ascii value.

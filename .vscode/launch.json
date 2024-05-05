@@ -5,8 +5,8 @@
             "name": "cmake 调试",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/pony",
-            "args": ["${workspaceFolder}/test/test_2.pony", "-emit=token"],
+            "program": "${workspaceFolder}/build/bin/pony",//./build/bin/pony ./test/test_8.pony -emit=token >t
+            "args": ["${workspaceFolder}/test/test_8.pony", "-emit=ast"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

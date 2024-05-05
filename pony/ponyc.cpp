@@ -259,11 +259,7 @@ int dumpToken()
       llvm::outs() << '[' << ' ';
       break;
     }
-    case tok_ivalid:
-    {
-      llvm::outs() <<' ';
-      break;
-    }
+
 
     case tok_sbracket_close:
     {
@@ -304,7 +300,6 @@ int dumpToken()
         llvm::outs() << double(num) << ' ';
       break;
     }
-
     default:
       llvm::outs() << char(token) << ' ';
       break;

@@ -1,0 +1,122 @@
+build/bin/pony test/test_8.pony -emit=ast
+  Module:
+    Function 
+      Proto 'main' @./test/test_8.pony:4:1
+      Params: []
+      Block {
+        VarDecl a<> @./test/test_8.pony:6:3
+          Literal: <2, 3>[ <3>[ 1.000000e+00, 2.000000e+00, 3.000000e+00], <3>[ 4.000000e+00, 5.000000e+00, 6.000000e+00]] @./test/test_8.pony:6:11
+        VarDecl b<2, 3> @./test/test_8.pony:7:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_8.pony:7:17
+        Print [ @./test/test_8.pony:8:3
+          var: a @./test/test_8.pony:8:9
+        ]
+        Print [ @./test/test_8.pony:9:3
+          var: b @./test/test_8.pony:9:9
+        ]
+      } // Block
+build/bin/pony test/test_9.pony -emit=ast
+  Module:
+    Function 
+      Proto 'main' @./test/test_9.pony:3:1
+      Params: []
+      Block {
+        VarDecl b<2, 3> @./test/test_9.pony:5:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_9.pony:5:17
+        Print [ @./test/test_9.pony:6:3
+          var: b @./test/test_9.pony:6:9
+        ]
+      } // Block
+build/bin/pony test/test_10.pony -emit=ast
+  Module:
+    Function 
+      Proto 'main' @./test/test_10.pony:3:1
+      Params: []
+      Block {
+        VarDecl a<2, 3> @./test/test_10.pony:5:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_10.pony:5:17
+        VarDecl b<3, 2> @./test/test_10.pony:6:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_10.pony:6:17
+        VarDecl c<> @./test/test_10.pony:7:3
+          BinOp: @ @./test/test_10.pony:7:15
+            var: a @./test/test_10.pony:7:11
+            var: b @./test/test_10.pony:7:15
+        Print [ @./test/test_10.pony:8:3
+          var: c @./test/test_10.pony:8:9
+        ]
+      } // Block
+build/bin/pony test/test_11.pony -emit=ast
+  Module:
+    Function 
+      Proto 'main' @./test/test_11.pony:4:1
+      Params: []
+      Block {
+        VarDecl a<> @./test/test_11.pony:6:3
+          Literal: <2, 3>[ <3>[ 1.000000e+00, 2.000000e+00, 3.000000e+00], <3>[ 4.000000e+00, 5.000000e+00, 6.000000e+00]] @./test/test_11.pony:6:11
+        VarDecl b<2, 3> @./test/test_11.pony:7:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_11.pony:7:17
+        VarDecl c<> @./test/test_11.pony:8:3
+          Literal: <2, 3>[ <3>[ 1.000000e+00, 2.000000e+00, 3.000000e+00], <3>[ 4.000000e+00, 5.000000e+00, 6.000000e+00]] @./test/test_11.pony:8:11
+        VarDecl d<2, 3> @./test/test_11.pony:9:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_11.pony:9:17
+        VarDecl e<> @./test/test_11.pony:10:3
+          BinOp: * @./test/test_11.pony:10:17
+            BinOp: + @./test/test_11.pony:10:14
+              var: a @./test/test_11.pony:10:12
+              var: c @./test/test_11.pony:10:14
+            BinOp: + @./test/test_11.pony:10:20
+              var: b @./test/test_11.pony:10:18
+              var: d @./test/test_11.pony:10:20
+        Print [ @./test/test_11.pony:11:3
+          var: e @./test/test_11.pony:11:9
+        ]
+      } // Block
+build/bin/pony test/test_12.pony -emit=ast
+  Module:
+    Function 
+      Proto 'multiply_transpose' @./test/test_12.pony:4:1
+      Params: [a, b]
+      Block {
+        Return
+          BinOp: * @./test/test_12.pony:5:25
+            Call 'transpose' [ @./test/test_12.pony:5:10
+              var: a @./test/test_12.pony:5:20
+            ]
+            Call 'transpose' [ @./test/test_12.pony:5:25
+              var: b @./test/test_12.pony:5:35
+            ]
+      } // Block
+    Function 
+      Proto 'main' @./test/test_12.pony:8:1
+      Params: []
+      Block {
+        VarDecl a<> @./test/test_12.pony:9:3
+          Literal: <2, 3>[ <3>[ 1.000000e+00, 2.000000e+00, 3.000000e+00], <3>[ 4.000000e+00, 5.000000e+00, 6.000000e+00]] @./test/test_12.pony:9:11
+        VarDecl b<2, 3> @./test/test_12.pony:10:3
+          Literal: <6>[ 1.000000e+00, 2.000000e+00, 3.000000e+00, 4.000000e+00, 5.000000e+00, 6.000000e+00] @./test/test_12.pony:10:17
+        VarDecl c<> @./test/test_12.pony:11:3
+          Call 'multiply_transpose' [ @./test/test_12.pony:11:11
+            var: a @./test/test_12.pony:11:30
+            var: b @./test/test_12.pony:11:33
+          ]
+        VarDecl d<> @./test/test_12.pony:12:3
+          Call 'multiply_transpose' [ @./test/test_12.pony:12:11
+            var: a @./test/test_12.pony:12:30
+            var: b @./test/test_12.pony:12:33
+          ]
+        VarDecl e<> @./test/test_12.pony:13:3
+          BinOp: + @./test/test_12.pony:13:39
+            BinOp: + @./test/test_12.pony:13:26
+              BinOp: * @./test/test_12.pony:13:24
+                Call 'transpose' [ @./test/test_12.pony:13:11
+                  var: a @./test/test_12.pony:13:21
+                ]
+                var: c @./test/test_12.pony:13:24
+              Call 'transpose' [ @./test/test_12.pony:13:26
+                var: b @./test/test_12.pony:13:36
+              ]
+            var: d @./test/test_12.pony:13:39
+        Print [ @./test/test_12.pony:14:3
+          var: e @./test/test_12.pony:14:9
+        ]
+      } // Block
