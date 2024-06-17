@@ -545,7 +545,7 @@ namespace pony
       {
         rhs = parseBinOpRHS(tokPrec, std::move(rhs));//取下完整的rhs,右递归
         lhs = std::make_unique<BinaryExprAST>(std::move(loc), binOp, std::move(lhs), std::move(rhs));//merge
-        return parseBinOpRHS(tokPrec, std::move(lhs));//左递归
+        return lhs;//左递归 这里貌似可以直接return lhs
       }
     }
 
