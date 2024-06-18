@@ -1,7 +1,7 @@
 #chmod +x test.sh
 #./test.sh
-
-for i in {8..12}; do
-    echo -e "\033[34mbuild/bin/pony test/test_${i}.pony -emit=ast\033[0m";
-    ./build/bin/pony ./test/test_${i}.pony -emit=ast
+#./build/bin/pony ./test/test_1.pony -emit=ast
+for i in {1..13}; do
+    echo -e "\033[34mbuild/bin/pony test/test_${i}.pony -emit=jit\033[0m";
+    ./build/bin/pony ./test/test_${i}.pony -emit=jit
 done

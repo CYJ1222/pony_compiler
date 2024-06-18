@@ -148,19 +148,42 @@ struct GemmOpLowering : public ConversionPattern {
     SmallVector<int64_t, 3> upperBounds(3);
 
     // TODO: Update upper bounds according to shape
-
+    // Get the shape of the input matrices.
+    auto lhs = operands[0];
+    auto rhs = operands[1];
+    auto lhsShape = lhs.getType().cast<MemRefType>().getShape();
+    auto rhsShape = rhs.getType().cast<MemRefType>().getShape();
+    // Ensure the shapes are compatible for matrix multiplication.
+    assert(lhsShape[1] == rhsShape[0] && "Matrix dimensions are not compatible for multiplication");
+    upperBounds = {lhsShape[0], rhsShape[1], lhsShape[1]};
     buildAffineLoopNest(
         rewriter, loc, lowerBounds, upperBounds, steps,
         [&](OpBuilder &nestedBuilder, Location loc, ValueRange ivs) {
           typename pony::GemmOp::Adaptor gemmAdaptor(operands);
           // TODO: Finish the build of affine loop
+          Value i = ivs[0], j = ivs[1], k = ivs[2];
 
+
+          // Load the elements of lhs and rhs.
+          auto lhsElement = nestedBuilder.create<AffineLoadOp>(loc, lhs, ValueRange{i, k});
+          auto rhsElement = nestedBuilder.create<AffineLoadOp>(loc, rhs, ValueRange{k, j});
+
+          // Multiply the loaded elements.
+          auto product = nestedBuilder.create<arith::MulFOp>(loc, lhsElement, rhsElement);
+
+          // Load the current value of the result matrix.
+          auto acc = nestedBuilder.create<AffineLoadOp>(loc, alloc, ValueRange{i, j});
+          
+          // Accumulate the product into the result matrix.
+          auto sum = nestedBuilder.create<arith::AddFOp>(loc, acc, product);
+          nestedBuilder.create<AffineStoreOp>(loc, sum, alloc, ValueRange{i, j});
         });
 
     rewriter.replaceOp(op, alloc);
     return success();
   }
 };
+
 
 //===----------------------------------------------------------------------===//
 // PonyToAffine RewritePatterns: Constant operations

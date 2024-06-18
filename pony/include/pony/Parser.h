@@ -193,7 +193,7 @@ namespace pony
     // You need to support the third method:
     //    (3) var<2,3> a = [1, 2, 3, 4, 5, 6]
     // Some functions may be useful:  getLastLocation(); getNextToken();
-    std::unique_ptr<VarDeclExprAST> parseDeclaration() // youcuo:
+    std::unique_ptr<VarDeclExprAST> parseDeclaration() //:
     {
       auto loc = lexer.getLastLocation();
 

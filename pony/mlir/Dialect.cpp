@@ -364,7 +364,19 @@ void GemmOp::print(mlir::OpAsmPrinter &p) { printBinaryOp(p, *this); }
 
 // TODO: Implement the shape inference
 void GemmOp::inferShapes() {
+  auto lhsType = getLhs().getType().dyn_cast<RankedTensorType>();
+  auto rhsType = getRhs().getType().dyn_cast<RankedTensorType>();
+
+
+  // Ensure that the inner dimensions of LHS and RHS match for matrix multiplication.
+
+  // The result type has the outer dimensions of LHS and RHS.
+  auto resultType = RankedTensorType::get({lhsType.getShape()[0], rhsType.getShape()[1]}, lhsType.getElementType());
+  return getResult().setType(resultType);
 }
+
+
+
 
 //===----------------------------------------------------------------------===//
 // ReturnOp
