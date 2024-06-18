@@ -215,7 +215,7 @@ namespace pony
         type = parseType();
         if (!type)
           return nullptr;
-        std::string id(lexer.getId()); // id暂时是null
+        std::string id(lexer.getId()); // id
 
         lexer.consume(tok_identifier);
         lexer.consume(Token('='));
@@ -346,10 +346,8 @@ namespace pony
       auto loc = lexer.getLastLocation(); // 取location
       lexer.consume(tok_identifier);      // comsume id
       Token tok = lexer.getCurToken();    // 取id后的tok
-
       if (lexer.getCurToken() != Token('(')) // Simple variable ref.
         return std::make_unique<VariableExprAST>(std::move(loc), name);
-
       lexer.consume(Token('('));                  // 跳过'('
       std::vector<std::unique_ptr<ExprAST>> args; // 解析参数数组
       if (lexer.getCurToken() != Token(')'))      // 参数非空
@@ -360,26 +358,21 @@ namespace pony
             args.push_back(std::move(arg)); // 参数非空
           else
             return nullptr; // 出错，暂时处理
-
           if (lexer.getCurToken() == Token(')')) // 是否结束
             break;
-
           if (lexer.getCurToken() != Token(','))                      // 没遇到了','
             return parseError<ExprAST>(", or )", "in argument list"); // 参数格式错误
           lexer.getNextToken();
         }
       }
       lexer.consume(Token(')')); // eat ')'
-
       // It can be a builtin call to print
       if (name == "print") // print特判
       {
         if (args.size() != 1) // print参数个数为1
           return parseError<ExprAST>("<single arg>", "as argument to print()");
-
         return std::make_unique<PrintExprAST>(loc, std::move(args[0])); // print ast
       }
-
       // Call to a user-defined function
       return std::make_unique<CallExprAST>(loc, std::string(name),
                                            std::move(args)); // 普通函数ast
